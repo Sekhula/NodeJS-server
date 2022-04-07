@@ -21,6 +21,9 @@ app.use( cors({origin: true, credentials: true}) )
 
 
 // app.use('/auth', auth)
+app.get('/', (req,res)=>{
+    res.send("hello");
+})
 app.use('/user', userRoute);
 app.use('/auth', authRoute);
 app.use('/subject', subjectRoute);
