@@ -1,3 +1,4 @@
+// Constants
 const express = require('express');
 const cors = require('cors');
 const userRoute = require('./Routes/user');
@@ -14,15 +15,11 @@ const corsOptions = {origin: '*'}
 app.use(cors(corsOptions))
 app.use(express.json());
 app.use(express.urlencoded());
-app.use( cors({origin: true, credentials: true}) ) 
-// Constants
-// const PORT = process.env.PORT || '4310';
-// const HOST = '0.0.0.0';
-
+app.use( cors({origin: true, credentials: true}) )
 
 // app.use('/auth', auth)
 app.get('/', (req,res)=>{
-    res.send("hello");
+    res.send("Edu app backend running");
 })
 app.use('/user', userRoute);
 app.use('/auth', authRoute);
@@ -32,7 +29,6 @@ app.use('/assignedSubject', assignedSubject);
 app.use((err,req,res)=>{
     console.log(err);
 })
-
 
 app.listen(PORT, HOST, ()=>{
     console.log('server is listening to port ', PORT);

@@ -9,29 +9,45 @@ module.exports.addSubject = (req, res) => {
     };
     console.log(subject); //To see if the data is received 
 
-    let query = {text: `INSERT INTO assigned_subject (user_id, subject_id) 
+    let query = {text: `INSERT INTO assigned_subject (user_id, subject_id)
     VALUES ($1, $2) RETURNING id`,
     value: [subject.user_id, subject.subject_id]}
 
-    pool.query(query.text, query.value)
+    let query_1 = {text: `SELECT subject_id, user_id FROM assigned_subject WHERE user_id = $1 AND subject_id = $2`,
+    value: [subject.user_id, subject.subject_id]
+    };
+
+    pool.query(query_1.text, query_1.value)
     .then(data => {
-        //Adding a subject 
-        return res.status(201).json(data.rows);
+        if(data.rowCount > 0){
+            console.log("Subject already added")
+            return res.status(201).json("Subject already added");
+        }
+        else{
+            pool.query(query.text, query.value).then(data =>{
+                //Adding a subject 
+                return res.status(201).json("Subject added successfully");
+            }).catch(err => console.log(err))
+        }
+        
+        
     })
     .catch(err => console.log(err))
 }
 
 module.exports.removeSubject = (req, res) => {
-    
+    let id = req.params.id;
+    id = id.substring(1);
+    console.log(id)
     let query = {
         text: `DELETE FROM assigned_subject WHERE id = $1`,
-        value: [req.params.id]
+        value: [id]
     }
 
     pool.query(query.text, query.value)
         .then(data => {
             if(data.rowCount) {
-                return res.status(201).json(`Successfully deleted subject with id: ${req.params.id}`)
+                return res.status(201).json(`Successfully deleted subject with id: ${id}`)
             }
         })
         .catch(err => {
@@ -40,15 +56,17 @@ module.exports.removeSubject = (req, res) => {
 }
 
 module.exports.viewMySubjects = (req, res) => {
-    console.log('Id: ' +req.params.id)
+    let id = req.params.id;
+    id = id.substring(1);
+    console.log(id)
     let query = {
         text: `
-        SELECT subject.name, subject.description, assigned_subject.subject_id, assigned_subject.user_id
+        SELECT assigned_subject.id, subject.name, subject.description, assigned_subject.subject_id, assigned_subject.user_id
         FROM subject
         INNER JOIN assigned_subject
         ON subject.id = assigned_subject.subject_id
         WHERE assigned_subject.user_id = $1;`,
-        value: [req.params.id]
+        value: [id]
     }
 
     pool.query(query.text, query.value)

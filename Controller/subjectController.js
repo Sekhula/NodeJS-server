@@ -40,10 +40,15 @@ module.exports.addSubject = (req, res) => {
  */
  module.exports.deleteSubject = (req, res) => {
 
+    let id = req.params.id;
+    id = id.substring(1);
+    console.log(id)
+
     let query = {
         text: `DELETE FROM subject WHERE id = $1`,
-        values: [req.params.id]
+        values: [id]
     }
+
     pool.query(query.text, query.values)
         .then(data => {
             if(data.rowCount) {
@@ -66,6 +71,8 @@ module.exports.addSubject = (req, res) => {
  */
  module.exports.updateSubject = (req, res) => {
 
+    let id = req.params.id;
+    id = id.substring(1);
     object ={
         name: req.body.name,
         description: req.body.description
@@ -74,7 +81,7 @@ module.exports.addSubject = (req, res) => {
     let query = {
         text: `UPDATE subject SET name = $1, description = $2, updated_at = NOW() 
                 WHERE id = $3`,
-        values: [object.name, object.description, req.params.id]
+        values: [object.name, object.description, id]
     }
 
     pool.query(query.text, query.values)
