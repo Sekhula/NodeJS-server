@@ -1,7 +1,6 @@
 const { response } = require('express');
 const pool = require('../db_config/config') //represents pool pg object required from connection file (is a stream of clients)
 
-
 module.exports.addSubject = (req, res) => {
 
     let subject = {
