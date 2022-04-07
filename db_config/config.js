@@ -6,7 +6,10 @@ const conn_string = "postgres://halunzavnhwret:a3840ebed6006a0fceef4174f994c98c0
 
 pool = new Pool({
 
-  connectionString: conn_string
+  connectionString: conn_string,
+  ssl: {
+    rejectUnauthorized: false
+  }
 
     /*user: process.env.DB_USER,
     host: process.env.DB_HOST,
