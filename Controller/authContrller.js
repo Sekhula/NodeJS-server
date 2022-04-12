@@ -24,6 +24,43 @@ module.exports.getAll = (req, res) => {
     //     return res.status(201).json(allUsers)
     // }, 1000)  
 }
+module.exports.getAllTeachers = (req, res) => {
+    // const userType = req.params.userType;
+    // let allUsers = {};
+    // console.log(userType);
+
+    pool.query(`SELECT id, full_name, email, cellno, status, userType, created_at, updated_at
+                FROM users WHERE userType != 'admin' AND userType = 'teacher';`)
+        .then(data => {
+            //Getting all 
+            // Users = data.rows
+            return res.status(201).json(data.rows);
+        })
+        .catch(err => console.log(err))
+        
+    // setTimeout(() => {
+    //     return res.status(201).json(allUsers)
+    // }, 1000)  
+}
+
+module.exports.getAllLearners = (req, res) => {
+    // const userType = req.params.userType;
+    // let allUsers = {};
+    // console.log(userType);
+
+    pool.query(`SELECT id, full_name, email, cellno, status, userType, created_at, updated_at
+                FROM users WHERE userType != 'admin' AND userType = 'learner';`)
+        .then(data => {
+            //Getting all 
+            // Users = data.rows
+            return res.status(201).json(data.rows);
+        })
+        .catch(err => console.log(err))
+        
+    // setTimeout(() => {
+    //     return res.status(201).json(allUsers)
+    // }, 1000)  
+}
 
 /**
  * gets a single user from the DB
@@ -121,3 +158,36 @@ module.exports.updateOne = (req, res) => {
             console.log(err)
         })
     }
+
+    module.exports.updateUserStatus = (req, res) => {
+        // const userType = req.params.userType;
+    
+        console.log(req.body);
+        let user = {
+            user_id: req.body.user_id,
+            user_status: req.body.user_status
+        
+        };
+    
+        console.log(user);
+    
+        let query = {
+            text: `UPDATE users SET status = $1, updated_at = NOW() 
+                    WHERE id = $2`,
+            values: [user.user_status, user.user_id]
+        }
+    
+        pool.query(query.text, query.values)
+            .then(data => {
+                if(data.rowCount) {
+                    console.log(data)
+                    return res.status(200).json(`Successfully updated staus of user with id: ${user.user_id}`)
+                } else {
+                    return res.status(404).json('user not found')
+                }
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    
+}

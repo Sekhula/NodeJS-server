@@ -2,8 +2,11 @@ const jwt = require('jsonwebtoken');
 const res = require('express/lib/response');
 const bcrypt = require('bcryptjs');
 const { isEmail, isMobilePhone } = require('validator');
+const {cloudinary} = require('../Cloudinary/cloudinary');
+const fs = require('fs');
 // const { v4: uuidv4 } = require('uuid')
-const pool = require('../db_config/config')   //represents pool pg object required from connection file
+const pool = require('../db_config/config');   //represents pool pg object required from connection file
+const { log } = require('console');
 
 
 /**
@@ -138,7 +141,7 @@ module.exports.signup = (req, res) => {
         .catch(err => {
             console.log(err);
             let error = queryErrorHandler(err)
-            return res.status(400).json(error)
+            return res.status(400).json("User already exists")
         }
     );
 }
@@ -187,33 +190,39 @@ module.exports.login = (req, res) => {
     pool.query(query.text, query.value)
         .then(data => {
             if (data.rowCount) //username exists
-            {  
-                //verify password
-                let decryptPassword = data.rows[0].password
-                // console.log(decryptPassword);
-                let passwordIsCorrect = bcrypt.compareSync(user.password, decryptPassword); //campare user password to hashed password in DB
+            { 
+                console.log(data.rows[0].status)
+                if(data.rows[0].status == true){
+                            
+                    //verify password
+                    let decryptPassword = data.rows[0].password
+                    // console.log(decryptPassword);
+                    let passwordIsCorrect = bcrypt.compareSync(user.password, decryptPassword); //campare user password to hashed password in DB
 
-                if (passwordIsCorrect) {  //pwd correct
-                    let payload = {
-                        id: data.rows[0].id
-                    }
+                    if (passwordIsCorrect) {  //pwd correct
+                        let payload = {
+                            id: data.rows[0].id
+                        }
 
-                    let token = generateToken(payload); //jwt token
-                    console.log(data.rows)
-                    let object = {
-                        id: data.rows[0].id,
-                        username: data.rows[0].email,
-                        phone: data.rows[0].cellno,
-                        full_names: data.rows[0].full_name,
-                        usertype : data.rows[0].usertype,
-                        token: token
-                    }
-                    //response
-                    return res.status(201).json(object);
+                        let token = generateToken(payload); //jwt token
+                        console.log(data.rows)
+                        let object = {
+                            id: data.rows[0].id,
+                            username: data.rows[0].email,
+                            phone: data.rows[0].cellno,
+                            full_names: data.rows[0].full_name,
+                            usertype : data.rows[0].usertype,
+                            status: data.rows[0].status,
+                            token: token
+                        }
+                        //response
+                        return res.status(201).json(object);
 
-                } else {throw new Error ('password is incorrect')}
+                    } else {res.status(400).json('password is incorrect')}
 
-            } else { throw new Error('username entered does not exist') }
+                } else {res.status(400).json('Account locked by admin')}
+
+            } else { res.status(400).json('username entered does not exist') }
         })
         .catch(err => {
             console.log(err);
@@ -231,4 +240,43 @@ module.exports.login = (req, res) => {
  */
 module.exports.logout = (req, res) => {
     res.status(200).json({token: ''});
+}
+
+module.exports.fileUpload = async (req, res, next) => {
+  
+
+    try {
+        var  qualification_url;
+        if (req.file) {
+            console.log("req",req.file);
+            if(req.file.size>10485760){
+                console.log("size");
+                return res.status(400).send({msg:"size too large"});
+            }
+            if(!req.file.mimetype === 'application/pdf' ){
+                console.log("pdf");
+                return res.status(400).send({msg:"wrong file formart expected pdf"});
+            }
+
+             qualification_url = req.file.path ? req.file.path : "";
+            console.log("qurl:",qualification_url);
+    
+        }
+        const uploadResponse = await cloudinary.uploader.upload(qualification_url, {
+            folder: 'qualification',
+            resource_type: 'raw'
+        });
+
+        const path = qualification_url;
+         console.log("del",path);
+        fs.unlinkSync(path);
+         console.log(uploadResponse.url);
+        //take cloudinary response and get url set cert_url to cloudinary url
+        return res.status(201).json({url: uploadResponse.url});
+
+
+    } catch (error) {
+        console.log(error);
+       next(error);
+    }
 }

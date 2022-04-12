@@ -88,10 +88,23 @@ CREATE TABLE assigned_subject(
     FOREIGN KEY(subject_id) REFERENCES subject (id)
 );
 
+--CHATS TABLE
+DROP TABLE IF EXISTS messages CASCADE;
+CREATE TABLE messages(
+    id SERIAL PRIMARY KEY,
+    sender_id INT NOT NULL,
+    reciever_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    message varchar(255),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY(reciever_id) REFERENCES users (id),
+    FOREIGN KEY(sender_id) REFERENCES users (id),
+    FOREIGN KEY(subject_id) REFERENCES subject (id)
+);
 
 --DUMMY INFO
  Create extension pgcrypto;
-INSERT INTO users(full_name, email, cellno, userType, status, password)
+INSERT INTO users(full_name, email, cellno, usertype, status, password)
 VALUES
 ('shiba', 'shiba@email.com', '0795813118', 'learner', true, crypt('shiba123',gen_salt('bf'))),
 ('forgiveness', 'forgiveness@email.com', '0712345618', 'learner', true, crypt('forgiveness123',gen_salt('bf'))),
@@ -99,7 +112,7 @@ VALUES
 ('fortunate', 'fortunate@email.com', '0712345616', 'learner', true, crypt('fortunate123',gen_salt('bf'))),
 ('phillip', 'phillip@email.com', '0712345615', 'learner', true, crypt('phillip123',gen_salt('bf')));
 
-INSERT INTO users(full_name, email, cellno, userType, status, password)
+INSERT INTO users(full_name, email, cellno, usertype, status, password)
 VALUES
 ('shibaT', 'shibaT@email.com', '0795813108', 'teacher', false, crypt('shiba123',gen_salt('bf'))),
 ('forgivenessT', 'forgivenessT@email.com', '0712345678', 'teacher', false, crypt('forgiveness123',gen_salt('bf'))),

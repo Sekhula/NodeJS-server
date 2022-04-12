@@ -7,6 +7,12 @@ const router = express.Router();
 //get all user's personal profiles - auth: admin only
 router.get('/getAll/', userController.getAll);
 
+//get all user's personal profiles - auth: admin only
+router.get('/getAllTeachers/', userController.getAllTeachers);
+
+//get all user's personal profiles - auth: admin only
+router.get('/getAllLearners/', userController.getAllLearners);
+
 //delete personal profile by id - auth: admin only
 router.delete('/delete/:id', userController.delete);
 
@@ -15,5 +21,8 @@ router.get('/getOne/:id', userController.getOne);
 
 //update user's profile by id auth: host, guest, admin
 router.put('/updateOne/:id', userController.updateOne);
+
+//update user's staatus by id auth: host, guest, admin
+router.put('/updateUserStatus/', userController.updateUserStatus);
 
 module.exports = router

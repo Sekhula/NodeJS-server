@@ -1,6 +1,7 @@
 const { response } = require('express');
 const pool = require('../db_config/config') //represents pool pg object required from connection file (is a stream of clients)
 
+//This is a module for a learner to assing a subject on their profile
 module.exports.addSubject = (req, res) => {
 
     let subject = {
@@ -35,6 +36,7 @@ module.exports.addSubject = (req, res) => {
     .catch(err => console.log(err))
 }
 
+//Learner Removing Subject from their assigned Subjects
 module.exports.removeSubject = (req, res) => {
     let id = req.params.id;
     id = id.substring(1);
@@ -54,7 +56,8 @@ module.exports.removeSubject = (req, res) => {
             console.log(err)
         });
 }
-
+//Function for the learner when he/she has assigned Subject(s) and
+//the subjects will be extracted from the the profile and be listed statically
 module.exports.viewMySubjects = (req, res) => {
     let id = req.params.id;
     id = id.substring(1);
@@ -68,7 +71,6 @@ module.exports.viewMySubjects = (req, res) => {
         WHERE assigned_subject.user_id = $1;`,
         value: [id]
     }
-
     pool.query(query.text, query.value)
     .then(data => {
         //Getting all 
