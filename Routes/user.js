@@ -24,4 +24,10 @@ router.post('/login', authController.login);
 //logout any user
 router.get('/logout', authController.logout);
 
+//Upload response saved to the db
+router.post('/myDocs', authController.myDocs);
+
+//Upload response saved to the db
+router.post('/get-docs', authController.getDocs);
+
 module.exports = router;

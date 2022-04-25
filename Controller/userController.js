@@ -242,9 +242,10 @@ module.exports.logout = (req, res) => {
     res.status(200).json({token: ''});
 }
 
-module.exports.fileUpload = async (req, res, next) => {
-  
+module.exports.uploadDocs = async (req, res, next) => {
 
+    console.log(req.body);
+    console.log(req.file);
     try {
         var  qualification_url;
         if (req.file) {
@@ -264,7 +265,8 @@ module.exports.fileUpload = async (req, res, next) => {
         }
         const uploadResponse = await cloudinary.uploader.upload(qualification_url, {
             folder: 'qualification',
-            resource_type: 'raw'
+            resource_type: 'auto',
+            use_filename: true
         });
 
         const path = qualification_url;
@@ -272,11 +274,60 @@ module.exports.fileUpload = async (req, res, next) => {
         fs.unlinkSync(path);
          console.log(uploadResponse.url);
         //take cloudinary response and get url set cert_url to cloudinary url
-        return res.status(201).json({url: uploadResponse.url});
+
+        let object = {
+            response_url : uploadResponse.url,
+            name: req.file.name
+        }
+
+        return res.status(201).json({object});
 
 
     } catch (error) {
-        console.log(error);
+        console.log(error.message);
        next(error);
     }
+}
+
+module.exports.myDocs = (req, res) => {
+
+    //Save upload response to the db
+    query = {
+        text: 'INSERT INTO qualification (name, description, qualification, teacher_id) VALUES ($1,$2,$3,$4)',
+        value: [req.body.name, req.body.description, req.body.upload_res, req.body.teacher_id]
+    }
+ 
+    // DB query
+    pool.query(query.text, query.value)
+        .then(data => {
+            if (data.rowCount) 
+            {
+                //response
+                return res.status(201).json('Successfully uploaded your qualification');
+
+            } else { res.status(400).json('Qualification upload failed') }
+        })
+        .catch(err => {
+            console.log(err);
+            let error = queryErrorHandler(err);
+            return res.status(400).json(error);
+        });
+
+}
+
+module.exports.getDocs = (req, res) => {
+    teacher_id = req.body.teacher_id;
+
+    let query = {
+        text:'SELECT * FROM qualification WHERE teacher_id =$1',
+        value: [teacher_id]
+    }
+
+    pool.query(query.text, query.value).then(data => {
+        console.log(data.rows)
+        return res.status(201).json(data.rows)
+    }).catch(err =>{
+        console.log(err)
+        return res.status(401).json("Couldn't find user documents")
+    })
 }

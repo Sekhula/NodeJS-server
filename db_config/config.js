@@ -3,7 +3,7 @@ require('dotenv').config();
 const { Pool } = require('pg');
 
 const conn_string = "postgres://halunzavnhwret:a3840ebed6006a0fceef4174f994c98c04d79061a335974572cb77b8d47fe007@ec2-54-160-109-68.compute-1.amazonaws.com:5432/df90pc3jsa3kpp";
-//Live better
+
 pool = new Pool({
 
   connectionString: conn_string,

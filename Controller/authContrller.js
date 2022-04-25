@@ -123,7 +123,7 @@ module.exports.updateOne = (req, res) => {
     pool.query(query.text, query.values)
         .then(data => {
             if(data.rowCount) {
-                console.log(data)
+                console.log(data.rows)
                 return res.status(200).json(`Successfully updated user with id: ${req.params.id}`)
             } else {
                 return res.status(404).json('user not found')

@@ -29,7 +29,7 @@ CREATE TABLE qualification(
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
-    certificate BYTEA,
+    qualification varchar(300) NOT NULL,
     teacher_id INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -62,15 +62,15 @@ CREATE TABLE subject(
 DROP TABLE IF EXISTS booking CASCADE;
 CREATE TABLE booking(
     id SERIAL PRIMARY KEY,
-    time VARCHAR(255) NOT NULL,
-    date timestamp,
     topic VARCHAR(255) NOT NULL,
-    duration INTEGER,
+    duration INTEGER NOT NULL,
+    date varchar(255) NOT NULL,
+    time varchar(255) NOT NULL,
     teacher_id INT NOT NULL,
     learner_id INT NOT NULL,
+    status VARCHAR(30) NOT NULL,
     subject_id INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY(teacher_id) REFERENCES users (id),
     FOREIGN KEY(learner_id) REFERENCES users (id),
     FOREIGN KEY(subject_id) REFERENCES subject (id)
@@ -88,19 +88,74 @@ CREATE TABLE assigned_subject(
     FOREIGN KEY(subject_id) REFERENCES subject (id)
 );
 
---CHATS TABLE
-DROP TABLE IF EXISTS messages CASCADE;
-CREATE TABLE messages(
+--DMs TABLE
+DROP TABLE IF EXISTS dms CASCADE;
+CREATE TABLE dms(
     id SERIAL PRIMARY KEY,
     sender_id INT NOT NULL,
     reciever_id INT NOT NULL,
     subject_id INT NOT NULL,
-    message varchar(255),
+    message varchar(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY(reciever_id) REFERENCES users (id),
     FOREIGN KEY(sender_id) REFERENCES users (id),
     FOREIGN KEY(subject_id) REFERENCES subject (id)
 );
+
+--REPLIES TABLE
+DROP TABLE IF EXISTS replies CASCADE;
+CREATE TABLE replies(
+    id SERIAL PRIMARY KEY,
+    sender_id INT NOT NULL,
+    replies varchar(255) NOT NULL,
+    post_id INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY(post_id) REFERENCES posts (id),
+    FOREIGN KEY(sender_id) REFERENCES users (id)
+);
+
+--Topic TABLE
+DROP TABLE IF EXISTS topic CASCADE;
+CREATE TABLE topic(
+    id SERIAL PRIMARY KEY,
+    sender_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    topic varchar(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY(sender_id) REFERENCES users (id),
+    FOREIGN KEY(subject_id) REFERENCES subject (id)
+);
+
+--POST TABLE
+DROP TABLE IF EXISTS posts CASCADE;
+CREATE TABLE posts(
+    id SERIAL PRIMARY KEY,
+    sender_id INT NOT NULL,
+    topic_id INT NOT NULL,
+    post varchar(500) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY(sender_id) REFERENCES users (id),
+    FOREIGN KEY(topic_id) REFERENCES topic (id)
+);
+
+--ROOM TABLE
+DROP TABLE IF EXISTS chat_room CASCADE;
+CREATE TABLE chat_room(
+    id SERIAL PRIMARY KEY,
+    learner_id INT NOT NULL,
+    teacher_id INT NOT NULL,
+    room varchar(20) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY(learner_id) REFERENCES users (id),
+    FOREIGN KEY(teacher_id) REFERENCES users (id)
+);
+
+
+
+INSERT INTO chat_room (learner_id, teacher_id, room)
+VALUES ($1, $2, $3) 
+
+-- SELECT max(id), learner_id, teacher_id, room FROM chat_room WHERE _id = $1
 
 --DUMMY INFO
  Create extension pgcrypto;
@@ -119,6 +174,14 @@ VALUES
 ('farananiT', 'farananiT@email.com', '0712345677', 'teacher', false, crypt('faranani123',gen_salt('bf'))),
 ('fortunateT', 'fortunateT@email.com', '0712345676', 'teacher', false, crypt('fortunate123',gen_salt('bf'))),
 ('phillipT', 'phillipT@email.com', '0712345675', 'teacher', false, crypt('phillip123',gen_salt('bf')));
+
+INSERT INTO chat_room (learner_id, teacher_id, room)
+VALUES
+(1, 6, 'room-1'),
+(2, 7, 'room-2'),
+(3, 8, 'room-3'),
+(4, 9, 'room-4'),
+(5, 10, 'room-5');
  
    
 --True = 1; False = 0

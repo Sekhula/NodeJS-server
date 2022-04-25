@@ -8,7 +8,6 @@ module.exports.addSubject = (req, res) => {
         user_id: req.body.user_id, //This is from the front-end
         subject_id: req.body.subject_id, 
     };
-    console.log(subject); //To see if the data is received 
 
     let query = {text: `INSERT INTO assigned_subject (user_id, subject_id)
     VALUES ($1, $2) RETURNING id`,
@@ -21,26 +20,29 @@ module.exports.addSubject = (req, res) => {
     pool.query(query_1.text, query_1.value)
     .then(data => {
         if(data.rowCount > 0){
-            console.log("Subject already added")
             return res.status(201).json("Subject already added");
         }
         else{
             pool.query(query.text, query.value).then(data =>{
                 //Adding a subject 
                 return res.status(201).json("Subject added successfully");
-            }).catch(err => console.log(err))
+            }).catch(err => {
+                return res.status(400).json("Couldn't add subject")
+            })
         }
         
         
     })
-    .catch(err => console.log(err))
+    .catch(err => {
+        
+        return res.status(400).json("Couldn't add subject")
+    })
 }
 
 //Learner Removing Subject from their assigned Subjects
 module.exports.removeSubject = (req, res) => {
     let id = req.params.id;
     id = id.substring(1);
-    console.log(id)
     let query = {
         text: `DELETE FROM assigned_subject WHERE id = $1`,
         value: [id]
@@ -53,7 +55,7 @@ module.exports.removeSubject = (req, res) => {
             }
         })
         .catch(err => {
-            console.log(err)
+            return res.status(400).json("Couldn't delete subject")
         });
 }
 //Function for the learner when he/she has assigned Subject(s) and
@@ -61,7 +63,6 @@ module.exports.removeSubject = (req, res) => {
 module.exports.viewMySubjects = (req, res) => {
     let id = req.params.id;
     id = id.substring(1);
-    console.log(id)
     let query = {
         text: `
         SELECT assigned_subject.id, subject.name, subject.description, assigned_subject.subject_id, assigned_subject.user_id
@@ -74,8 +75,36 @@ module.exports.viewMySubjects = (req, res) => {
     pool.query(query.text, query.value)
     .then(data => {
         //Getting all 
-        console.log(data.rows)
         return res.status(201).json(data.rows);
     })
-    .catch(err => console.log(err))
+    .catch(err => {
+        
+        return res.status(400).json("Couldn't retrieve subjects")
+    })
+}
+
+//Gets Teachers for a specific subject
+module.exports.getTeachers = (req, res) => {
+    
+    let subject_id = req.params.id;
+    subject_id = subject_id.substring(1);
+    let query = {
+        text: `
+        SELECT assigned_subject.id, assigned_subject.subject_id, assigned_subject.user_id, assigned_subject.created_at, users.full_name
+        FROM assigned_subject
+        INNER JOIN users
+        ON users.id = assigned_subject.user_id
+        WHERE users.usertype = 'teacher'
+        AND assigned_subject.subject_id = $1;`,
+        value: [subject_id]
+    }
+    pool.query(query.text, query.value)
+    .then(data => {
+        //Getting all 
+        return res.status(201).json(data.rows);
+    })
+    .catch(err => {
+        
+        return res.status(400).json("Couldn't retrieve teachers")
+    })
 }

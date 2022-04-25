@@ -9,13 +9,11 @@ const jwt = require('jsonwebtoken');
  */
  module.exports.authTeachertUser = (req, res, next) => {
     let token = '';
-    console.log(token);
 
     if (token) {    //token exists
         let decoded = jwt.verify(token, 'w');
 
         if (decoded) {  //token verified
-            console.log('token decoded: ', decoded);
             //set req{ userType, userId} to be used by controller
             req.userType = decoded.userType;
             req.userId = decoded.id;
@@ -38,13 +36,11 @@ const jwt = require('jsonwebtoken');
  */
  module.exports.authLearnertUser = (req, res, next) => {
     let token = '';
-    console.log(token);
 
     if (token) {    //token exists
         let decoded = jwt.verify(token, 'w');
 
         if (decoded) {  //token verified
-            console.log('token decoded: ', decoded);
             // set req{ userType, userId} to be used by controller
             req.userType = decoded.userType;
             req.userId = decoded.id;
@@ -67,13 +63,11 @@ const jwt = require('jsonwebtoken');
  */
  module.exports.authAdminUser = (req, res, next) => {
     let token = '';
-    console.log(token);
 
     if (token) {    //token exists
         let decoded = jwt.verify(token, 'w');
 
         if (decoded) {  //token verified
-            console.log('token decoded: ', decoded);
             //set req{ userType, userId} to be used by controller
             req.userType = decoded.userType;
             req.userId = decoded.id;
@@ -96,13 +90,11 @@ const jwt = require('jsonwebtoken');
  */
  module.exports.authUser = (req, res, next) => {
     let token = '';
-    console.log(token);
 
     if (token) { //token exists
         let decoded = jwt.verify(token, 'w');
 
         if (decoded) {  //token verified
-            console.log('token decoded: ', decoded);
             //set req{ userType, userId} to be used by controller
             req.userType = decoded.userType;
             req.userId = decoded.id;
