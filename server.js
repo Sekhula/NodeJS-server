@@ -9,6 +9,7 @@ const auth = require('./Authentication/authentication');
 const assignedSubject = require('./Routes/assignedSubject');
 const messagingRoute = require('./Routes/messaging');
 const bookingRoute = require('./Routes/booking');
+const chats = require('./Routes/chats');
 
 const cloudinary = require('./Cloudinary/cloudinary');
 const multer = require('multer');
@@ -37,6 +38,7 @@ app.use('/assignedSubject', assignedSubject);
 app.use('/upload',uploader.single("file") ,upload);
 app.use('/messaging', messagingRoute);
 app.use('/booking', bookingRoute);
+app.use('/chats', chats);
 
 app.use((err,req,res)=>{
     console.log(err);
